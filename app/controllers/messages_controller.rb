@@ -10,8 +10,11 @@ class MessagesController < ApplicationController
 	end
 
 	def create
-		Message.create(body: params[:message][:body], username: session[:username])
-		redirect_to messages_url		
+		@message = Message.create(body: params[:message][:body], username: session[:username])
+		
+		respond_to do |format|
+			format.json{render json:{message: @message}}
+		end	
 	end
 
 end
