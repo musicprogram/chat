@@ -11,7 +11,18 @@ class MessagesController < ApplicationController
 
 	def create
 		@message = Message.create(body: params[:message][:body], username: session[:username])
+
+		#publish channel
+		channel = $rabbit.create_channel
+		exchange = channel.fanout("chat")
+		logger.info "Publishing a message"
+		message = {message: params[:message][:body]}.to_json
+		logger.debug message
+
+		exchange.publish(message, routing_key: "new_message")
+
 		
+		#Generate JSON
 		respond_to do |format|
 			format.json{render json:{message: @message}}
 		end	
